@@ -2,53 +2,49 @@ from pydantic import BaseModel
 
 from typing import List, Union
 
-#club member
-class ClubMemberBase(BaseModel):
-    clubmember_id: int
-    # userID: 
-    # clubID: 
+from datetime import datetime
 
-class ClubMemberCreate(ClubMemberBase):
-    pass
-
-class ClubMember(ClubMemberBase):
-    class Config:
-        orm_mode = True
-
-
-#club minister
-class ClubMinisterBase(BaseModel):
-    clubminister_id: int
-
-class ClubMinisterCreate(ClubMinisterBase):
-    pass
-
-class ClubMinister(ClubMinisterBase):
-    class Config:
-        orm_mode = True
 
 #picture
 class PictureBase(BaseModel):
     pic_id: int
+
+class Pictures(PictureBase):
+    num_friendly: int
+    reportErr_new_picID: int
+    pic_date: datetime
+    pic_hash: str
+
 class PictureCreate(PictureBase):
-    pass
+    num_friendly: int
+    pic_date: datetime
+
+class PictureUpload(PictureBase):
+    pic_hash: str
+
+class PictureWrong(PictureBase):
+    reportErr_new_picID: int
+
+
+#booked
 class
 
 
 #user
-class UserBase(BaseModel):
-    student_id: str
-    username: str
+class ClubBase(BaseModel):
+    club_id: int
 
-
-class UserCreate(UserBase):
+class ClubCreate(ClubBase):
+    password: str
+    club_name: str
+    club_address: str
     password: str
 
 
-class User(UserBase):
-    user_clubs_mem: List[ClubMember] = []
-    user_clubs_mini: List[ClubMinister] = []
-    user_upload_pics: List[Picture] = []
+class Clubs(ClubCreate):
+    club_upload_pics: List[Picture] = []
+    club_booked_records: List[]
+
     class Config:
         orm_mode = True
 
