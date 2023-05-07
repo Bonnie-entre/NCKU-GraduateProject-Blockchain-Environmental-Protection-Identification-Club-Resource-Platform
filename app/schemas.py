@@ -1,78 +1,110 @@
 from pydantic import BaseModel
 
-from typing import List, Union
+from typing import List, Optional
 
 from datetime import datetime
 
 
 #picture
 class PictureBase(BaseModel):
-    pic_id: int
+    id: int
 
 class Pictures(PictureBase):
     num_friendly: int
-    reportErr_new_picID: int
-    pic_date: datetime
-    pic_hash: str
+    reportErr_new_picID: Optional[int] = None
+    date: datetime
+    hash: str
+    activity_id: int
 
-class PictureCreate(PictureBase):
+class PictureCreate(BaseModel):
     num_friendly: int
-    pic_date: datetime
+    date: datetime
+    activity_id: int
 
-class PictureUpload(PictureBase):
-    pic_hash: str
+class PictureErrReport(BaseModel):
+    reportErr_picID: int
+    num_friendly: int
 
 class PictureWrong(PictureBase):
-    reportErr_new_picID: int
+    Err_accept: bool
 
+
+#resources
+class ResourceBase(BaseModel):
+    id: int
+    name: str
+
+class Resources(ResourceBase):
+    cost: int
+
+    class Config:
+        orm_mode = True
+    
 
 #booked
-class
+class BookBase(BaseModel):
+    id: int
 
-
-#user
-class ClubBase(BaseModel):
+class BookCreate(BaseModel):
+    resource_id: int
+    booked_day: str
     club_id: int
+    # day: str
+    hr: List[int]
 
-class ClubCreate(ClubBase):
-    password: str
-    club_name: str
-    club_address: str
-    password: str
-
-
-class Clubs(ClubCreate):
-    club_upload_pics: List[Picture] = []
-    club_booked_records: List[]
+class Books(BookCreate):
+    pass
 
     class Config:
         orm_mode = True
 
 
-#
+#user
+class ClubBase(BaseModel):
+    id: int
+
+class ClubModify(BaseModel):
+    password: Optional[str] = None
+    name: Optional[str] = None
+    address: Optional[str] = None
+
+class Clubs(ClubBase):
+    password: str
+    name: str
+    address: Optional[str] = None
+    upload_pics: List[Pictures] = []
+    booked_records: List[Books] = []
+
+    class Config:
+        orm_mode = True
+
+
+#transaction
 class TransactionBase(BaseModel):
-    transaction_id: int
+    id: int
 
 class TransactionCreate(TransactionBase):
     pass
 
-class Transaction(TransactionBase):
+class Transactions(TransactionBase):
+    amount: int
+    token_left: int
+    hash: str
+    date: datetime
+
     class Config:
         orm_mode = True
 
 
 #activity
 class ActivityBase(BaseModel):
-    activity_id: int
-    activity_name: str
-    activity_date: str
-    pics: List[Picture] = []
-    transactID: List[Transaction] = []
+    id: int
+    name: str
+    date: datetime
 
-class ActivityCreate(ActivityBase):
-    pass
+class Activities(ActivityBase):
+    picture: List[Pictures] = []
 
-class Activity(ActivityBase):
     class Config:
         orm_mode = True
 

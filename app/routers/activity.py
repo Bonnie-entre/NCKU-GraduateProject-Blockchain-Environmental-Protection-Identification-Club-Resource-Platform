@@ -1,23 +1,19 @@
-from fastapi import APIRouter, FastAPI, Response, status, Depends
-# from fastapi.responses import HTMLResponse
-from typing import Optional, List
-# from .. import models, schemas
-from ..database import get_db, connect_cursor
+from fastapi import APIRouter, HTTPException, status, Depends
+from typing import List
+from app.models import *
+from app.schemas import *
+from app.database import get_db
 from sqlalchemy.orm import Session
 
 
-router = APIRouter(
+router_activity = APIRouter(
                     prefix="/activities"
         )
 
 
-@router.get("/")
-def getActivities(db: Session = Depends(get_db), userid: str | Optional[str]=None):
-    #Activity -> (Picture + Transaction)
-    return
-
-
-# @router.post("/createActivity")
-# def createActivity(db: Session = Depends(get_db)):
-#     #
-#     return
+@router_activity.get("/{club_id}") #, response_model=List[Activities])
+def getActivities(club_id: int, db: Session = Depends(get_db)):
+    db_activities = db.query(Activity).filter(Activity.id==club_id).all()
+    if db_activities is None or len(db_activities)==0: 
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no activities for club {club_id}')
+    return db_activities

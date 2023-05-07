@@ -4,85 +4,102 @@ from sqlalchemy import (
     String,
     Column,
     Integer,
+    ARRAY,
     DateTime,
+    Boolean,
+    ForeignKey
 )
 
-from .database import Base
+from app.database import Base
 
 
 class Club(Base):
     __tablename__ = "clubs"
 
-    club_id = Column(Integer, primary_key=True)
-    club_name = Column(String, nullable=False)
-    club_address = Column(String, nullable=True)      #how to practice blockchain purse??
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    address = Column(String, nullable=True)
     password = Column(String, default='0000')
 
-    club_upload_pics = relationship("Picture", back_populates="clubID")
-    club_booked_records = relationship("Booked", back_populates="clubID")
-    club_transact_records = relationship("Transaction", back_populates="clubID")
+    booked = relationship("Booked", back_populates="club")
+    transact = relationship("Transaction", back_populates="club")
+    activity = relationship("Activity", back_populates="club")
 
 
 class Picture(Base):
     __tablename__ = "pictures"
 
-    pic_id = Column(Integer, primary_key=True)      #pic_name = pic_id.jpg
+    id = Column(Integer, primary_key=True)      #pic_name = pic_id.jpg
     num_friendly = Column(Integer, nullable=False)  #-1: mark as uncheck recheck case
     reportErr_new_picID = Column(Integer, nullable=True)
-    pic_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)         #TODO init??, when append a row
-    pic_hash = Column(String, nullable=True)
+    date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)         #TODO init??, when append a row
+    hash = Column(String, nullable=True)
+    Err_accept = Column(Boolean, nullable=True)
     
-    clubID = relationship("Club", back_populates="club_upload_pics")
-    activityID = relationship("Activity", back_populates="pics")
-    transactID = relationship("Transaction", back_populates="picID")
+    activity_id = Column(Integer, ForeignKey("activities.id"))
+    activity = relationship("Activity", back_populates="picture")
 
 
 class Resource(Base):
     __tablename__ = "resources"
 
-    resource_id = Column(Integer, primary_key=True)
-    resource_name = Column(String, nullable=False)
-    resource_cost = Column(Integer, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    cost = Column(Integer, nullable=False)
 
-    booked_records = relationship("Booked", back_populates="resourceID")
+    booked = relationship("Booked", back_populates="resource")
 
 
 class Booked(Base):
     __tablename__ = "booked"
 
-    booked_id = Column(Integer, primary_key=True)
-    booked_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)         #TODO init??, when append a row
-    booked_seg = Column(Integer, nullable=False)    #unit = an hour, number present the start hour
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)         #record
+    day = Column(String, nullable=True)     #book
+    hr = Column(Integer, nullable=False)    #unit = an hour, number present the start hour: 0~23
     
-    resourceID = relationship("Resource", back_populates="booked_records")
-    clubID = relationship("Club", back_populates="club_booked_records")
-    transactID = relationship("Transaction", back_populates="bookedID")
+    resource_id = Column(Integer, ForeignKey("resources.id"))
+    resource = relationship("Resource", back_populates="booked")
+    club_id = Column(Integer, ForeignKey("clubs.id"))
+    club = relationship("Club", back_populates="booked")
+    transact_id = Column(Integer, ForeignKey("transactions.id"))
+    transact = relationship("Transaction", back_populates="booked")
+    available_id = Column(String, ForeignKey("availables.resourceId_bookedDay"))
+    available_day = relationship("Available", back_populates="occupy_bookedID")
+
+
+class Available(Base):
+    __tablename__ = "availables"
+
+    resourceId_bookedDay = Column(String, primary_key=True)     #ex.'2_20240505'
+    occupy_hr = Column(ARRAY(Integer))
+    occupy_bookedID = relationship("Booked", back_populates="available_day")
 
 
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    transaction_id = Column(Integer, primary_key=True)
-    transact_amount = Column(Integer, nullable=False)
+    id = Column(Integer, primary_key=True)
+    amount = Column(Integer, nullable=False)
     token_left = Column(Integer, nullable=False)
-    transact_hash = Column(String, nullable=True)
-    transact_date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    hash = Column(String, nullable=True)
+    date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    clubID = relationship("Club", back_populates="club_transact_records")
-
-    #TODO relation 可為空嗎??
-    bookedID = relationship("Booked", back_populates="transactID")
-    picID = relationship("Picture", back_populates="transactID")
-    activityID = relationship("Activity", back_populates="transactID")
-
+    club_id = Column(Integer, ForeignKey("clubs.id"))
+    club = relationship("Club", back_populates="transact")
+    acticity_id = Column(Integer, ForeignKey("activities.id"))
+    activity = relationship("Activity", back_populates="transaction")
+    booked = relationship("Booked", back_populates="transact")
+    
 
 class Activity(Base):
     __tablename__ = "activities"
 
-    activity_id = Column(Integer, primary_key=True)
-    activity_name = Column(String, nullable=False)
-    activity_date = Column(DateTime, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    date = Column(DateTime, nullable=False)
 
-    pics = relationship("Picture", back_populates="activityID")
-    transactID = relationship("Transaction", back_populates="activityID")
-    
+    club_id = Column(Integer, ForeignKey("clubs.id"))
+    club = relationship("Club", back_populates="activity")
+    picture = relationship("Picture", back_populates="activity")
+    transaction = relationship("Transaction", back_populates="activity")
