@@ -18,7 +18,7 @@ def getPictures(activity_id: int, db: Session = Depends(get_db)):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no pics for activity {acticity_id}')
     return db_pics
 
-@router_picture.post("/upload", response_model=PictureUpload)
+@router_picture.post("/upload", response_model=Pictures)
 def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     #TODO Blockchain
     hash = '0x0000'
@@ -26,6 +26,7 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     add_pic = Picture(
         num_friendly = picture.num_friendly,
         activity_id = picture.activity_id,
+        base64 = picture.base64,
         hash = hash
     )
     #TODO 圖片存檔

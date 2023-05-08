@@ -20,6 +20,7 @@ class PictureCreate(BaseModel):
     num_friendly: int
     date: datetime
     activity_id: int
+    base64: str
 
 class PictureErrReport(BaseModel):
     reportErr_picID: int

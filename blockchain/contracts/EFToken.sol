@@ -1,25 +1,25 @@
-/* This is Version 1.0 
+/* This is Version 2.0 
     Author: Cai Yi-Wen */
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
-
-// in Formal version should add onlyOwner limit to backend Call Contract only!!
-
-contract EnvironmentalFriendly{
-    /* Token */
-    string private  constant _name="Environmental Friendly Token";
-    string private  constant _symbol="EFT";
-    uint256 private _totalSupply;
+contract EFToken is ERC20, Ownable{
+    uint256 constant initialSupply = 1000000;
+    
 
     /* Variables */
+    uint256 club_num = 0;
+    uint256 resource_num = 0;
+    mapping (uint => Club) clubs;
+    mapping  (uint => Resource) resources;
+
     struct Club{
         string name;
         address addr;
-        uint256 balance;
     }
 
     struct Resource{
@@ -27,10 +27,6 @@ contract EnvironmentalFriendly{
         uint256 cost;
     }
 
-    uint256 club_num;
-    uint256 resource_num;
-    mapping (uint => Club) clubs;
-    mapping  (uint => Resource) resources;
 
     /* Events */
     event AddClub(
@@ -60,7 +56,7 @@ contract EnvironmentalFriendly{
         uint256 _cost
     );
 
-    event EnvironmentalFriendly(
+    event uploadPicture(
         uint256 indexed _clubID,
         string _clubName,
         uint256 indexed _activityID,
@@ -85,14 +81,8 @@ contract EnvironmentalFriendly{
         uint256 _token
     );
 
-
-
-    constructor(){
-        club_num = 0;
-        resource_num = 0;
-
-        //     _mint(msg.sender, 1000000 * 10**12, "constructor"); //just in case
-
+    constructor() ERC20("Environmental Friendly Token", "EFT") {
+        _mint(msg.sender, initialSupply);
     }
 
 
@@ -105,13 +95,13 @@ contract EnvironmentalFriendly{
         uint256 _picID,
         uint256 _picNum, 
         string memory _base64
-    ) external {
-        uint256 _token = _picNum;   //1:1 or not?
-        clubs[_clubID].balance += _token;
-        _totalSupply += _token;
+    ) external onlyOwner{
+        uint256 _amount = _picNum;   //1:1 or not?
+        _mint(clubs[_clubID].addr, _amount);
 
-        emit EnvironmentalFriendly(_clubID, clubs[_clubID].name, _activityID, _activityName, _date, _picID, _picNum, _token, _base64);
+        emit uploadPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _date, _picID, _picNum, _amount, _base64);
     }
+
 
     function ModifyPicnum_Add(
         uint256 _clubID,
@@ -121,15 +111,16 @@ contract EnvironmentalFriendly{
         uint256 _picID,
         uint256 _picNum,
         uint256 _add
-    ) external {
-        uint256 _token = _add;   //1:1 or not?
-        clubs[_clubID].balance += _token;
-        uint256 _balance = clubs[_clubID].balance;
-        _totalSupply += _token;        
+    ) external onlyOwner{
+        uint256 _balance = balanceOf(clubs[_clubID].addr);
+        uint256 _amount = _add;   //1:1 or not?
+        _mint(clubs[_clubID].addr, _amount);
 
-        emit ModifyPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _picID, _oldnum, _picNum, _balance, "Add", _token);
+        emit ModifyPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _picID, _oldnum, _picNum, _balance, "Add", _amount);
     }
 
+
+    // can work only after approve
     function ModifyPicnum_Retake(
         uint256 _clubID,
         uint256 _activityID,
@@ -138,13 +129,12 @@ contract EnvironmentalFriendly{
         uint256 _picID,
         uint256 _picNum,
         uint256 _minus
-    ) external {
-        uint256 _token = _minus;   //1:1 or not?
-        clubs[_clubID].balance -= _token;
-        uint256 _balance = clubs[_clubID].balance;
-        _totalSupply -= _token;        
+    ) external onlyOwner{
+        uint256 _balance = balanceOf(clubs[_clubID].addr);
+        uint256 _amount = _minus;   //1:1 or not?
+        _transfer(clubs[_clubID].addr, owner(), _amount);    
 
-        emit ModifyPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _picID, _oldnum, _picNum, _balance, "Minus", _token);
+        emit ModifyPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _picID, _oldnum, _picNum, _balance, "Minus", _amount);
     }
 
 
@@ -154,12 +144,30 @@ contract EnvironmentalFriendly{
         uint256 _resourceID,
         string memory _date
     ) external {
+        require(clubs[_clubID].addr==_msgSender(), "You're not the Club Token Holder!!");
         uint256 _cost = resources[_resourceID].cost;
-        require(clubs[_clubID].balance >= _cost, "Not enough EFT in club balance left!");
-        clubs[_clubID].balance -= _cost;
+        transfer(owner(), _cost);    
 
         emit BookedResource(_clubID, clubs[_clubID].name, _date, _resourceID, resources[_resourceID].name, _cost);
     }
+
+
+    /* Backend Book Resource */
+    function ApproveBackend() external {
+        approve(owner(), 10000);
+    }
+
+    function BookResource_backend(
+        uint256 _clubID,
+        uint256 _resourceID,
+        string memory _date
+    ) external onlyOwner{
+        uint256 _cost = resources[_resourceID].cost;
+        _transfer(clubs[_clubID].addr, owner(), _cost);      //need approve  
+
+        emit BookedResource(_clubID, clubs[_clubID].name, _date, _resourceID, resources[_resourceID].name, _cost);
+    }
+
 
     /* Resource Detail*/
     function ResourceCost(
@@ -179,7 +187,7 @@ contract EnvironmentalFriendly{
     function ClubBalance(
         uint256 _clubID
     ) external view returns(uint256){
-        return clubs[_clubID].balance;
+        return balanceOf(clubs[_clubID].addr);
     }
     
     function ClubAddress(
@@ -194,8 +202,6 @@ contract EnvironmentalFriendly{
         return clubs[_clubID].name;
     }
 
-    // function _mint()
-    // function _transfer()
 
     /* Set Function */
     function ModifyResourceCost(
@@ -211,7 +217,7 @@ contract EnvironmentalFriendly{
         uint256 _id,
         string memory name_,
         uint256 _cost
-    ) external {
+    ) external onlyOwner{
         resources[_id].name = name_;
         resources[_id].cost = _cost;
 
@@ -220,28 +226,13 @@ contract EnvironmentalFriendly{
 
     function CreateClub(        
         uint256 _id,
-        string memory  name_,
+        string memory  _name,
         address _addr
-    ) external{
-        clubs[_id].name = name_;
+    ) external onlyOwner{
+        clubs[_id].name = _name;
         clubs[_id].addr = _addr;
-        clubs[_id].balance = 0;
 
-        emit AddClub(_id, name_, _addr);
+        emit AddClub(_id, _name, _addr);
     }
 
-
-    /* Get Variables */
-    function totalSupply() public view returns (uint256) {
-        return _totalSupply;
-    }
-
-    function symbol() public pure returns (string memory) {
-        return _symbol;
-    }
-
-    function name() public pure returns (string memory) {
-        return _name;
-    }
-    
 }

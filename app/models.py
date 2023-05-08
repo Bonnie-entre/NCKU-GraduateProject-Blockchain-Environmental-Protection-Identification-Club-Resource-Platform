@@ -35,6 +35,7 @@ class Picture(Base):
     date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)         #TODO init??, when append a row
     hash = Column(String, nullable=True)
     Err_accept = Column(Boolean, nullable=True)
+    base64 = Column(String, nullable=True)
     
     activity_id = Column(Integer, ForeignKey("activities.id"))
     activity = relationship("Activity", back_populates="picture")
