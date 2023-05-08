@@ -19,7 +19,7 @@ def getResources(db: Session = Depends(get_db)):
 
 
 @router_resource.get("/occupy/{resource_id}/{booked_day}")
-def getOccupy(resource_id: int, booked_day: int, db: Session = Depends(get_db)):
+def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     query_id = resource_id + '_' + booked_day
     db_resource_booked = db.query(Available).filter(Available.resourceId_bookedDay==query_id).first()
     
@@ -35,7 +35,7 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
     db_last_transact = db.query(Transaction).filter(Transaction.club_id==book.club_id).order_by(Transaction.id.desc()).first()
     after_transact_token = db_last_transact.token_left - (db_resource.cost * len(book.hr))
     if after_transact_token<0:
-        return HTTPException(detail=f'club {book.club_id}''s token={db_last_transact.token_left} < resource''cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
+        return HTTPException(detail=f'club {book.club_id}\'s token={db_last_transact.token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
     
     # TODO 連動 blockchain 進行交易
     hash='0x000'
@@ -44,10 +44,11 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
 
     # add transact
     add_transact = Transaction(
-        amount = db_resource.cost,
+        amount = db_resource.cost* len(book.hr),
         token_left = after_transact_token,
         hash = hash,
         club_id = book.club_id,
+        acticity_id=book.activity_id
     ) 
     db.add(add_transact)
     db.commit()
@@ -63,11 +64,10 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         )
         db.add(add_available)
     else:
-        add_available.id = query_available.id
         query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
     db.commit()
 
-    # TODO 把 db 的 Booked.hr 改成 array~
+    # TODO 把 db 的 Booked.hr 改成 array~ for 減少資料數目, but why booked?
     # add booked
     for i in book.hr:
         add_booked = Booked(
@@ -75,8 +75,8 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
             hr = i,
             resource_id = book.resource_id,
             club_id = book.club_id,
-            tansact_id = add_transact.id,
-            available_id = add_available.resourceId_bookedDay
+            transact_id = add_transact.id,
+            available_id = query_id
         )
         db.add(add_booked)
         db.commit()

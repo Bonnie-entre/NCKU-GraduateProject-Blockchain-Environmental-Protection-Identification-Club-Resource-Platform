@@ -14,9 +14,9 @@ router_transaction = APIRouter(
         )
 
 
-@router_transaction.get("/", response_model=List[Transactions])
-def getTransactions(club: ClubBase, db: Session = Depends(get_db)):
-    db_transactions = db.query(Transaction).filter(Transaction.club_id == club.id).all()
+@router_transaction.get("/{club_id}", response_model=List[Transactions])
+def getTransactions(club_id: int, db: Session = Depends(get_db)):
+    db_transactions = db.query(Transaction).filter(Transaction.club_id == club_id).all()
     if db_transactions is None:
-        return Response(content = f'there is no activities for club {club.id}', status_code=status.HTTP_404_NOT_FOUND)   
+        return Response(content = f'there is no activities for club {club_id}', status_code=status.HTTP_404_NOT_FOUND)   
     return db_transactions

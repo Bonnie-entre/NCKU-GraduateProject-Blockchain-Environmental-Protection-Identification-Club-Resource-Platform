@@ -50,6 +50,7 @@ class BookCreate(BaseModel):
     resource_id: int
     booked_day: str
     club_id: int
+    activity_id: int
     # day: str
     hr: List[int]
 

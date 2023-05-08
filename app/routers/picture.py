@@ -11,11 +11,11 @@ router_picture = APIRouter(
         )
 
 
-@router_picture.get("/{activity_id}", response_model=List[Pictures])
+@router_picture.get("/{activity_id}")
 def getPictures(activity_id: int, db: Session = Depends(get_db)):
     db_pics = db.query(Picture).filter(Picture.activity_id == activity_id).all()
     if db_pics is None or len(db_pics)==0: 
-        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no pics for activity {acticity_id}')
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no pics for activity {activity_id}')
     return db_pics
 
 @router_picture.post("/upload", response_model=Pictures)
@@ -34,6 +34,8 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     db.add(add_pic)
     db.commit()
     db.refresh(add_pic)
+
+    #TODO add Transaction, 給 token!! (backend 的計算 based on transaction 的 left token)
 
     return add_pic
 
@@ -58,3 +60,9 @@ def reportErr(picture: PictureErrReport, db: Session = Depends(get_db)):
     db.commit()
 
     return Response(status_code=status.HTTP_200_OK)
+
+
+#TODO 後端確認圖片的 ErrReport
+# - 重整 picture reportErr_picID 的 Err_accept 欄位
+# - 呼叫 contract modify function
+# - 發 transaction, 更新 token_left
