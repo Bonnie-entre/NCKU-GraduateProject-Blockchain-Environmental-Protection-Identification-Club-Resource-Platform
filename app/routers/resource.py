@@ -6,6 +6,7 @@ from app.models import *
 from app.database import get_db
 from sqlalchemy.orm import Session
 
+from blockchain.src.EFT_functions import BookResource_backend
 
 router_resource = APIRouter(
                     prefix="/resources"
@@ -37,10 +38,16 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
     if after_transact_token<0:
         return HTTPException(detail=f'club {book.club_id}\'s token={db_last_transact.token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
     
-    # TODO 連動 blockchain 進行交易
-    hash='0x000'
+    # blockchain
+    hash = BookResource_backend(
+                        book.club_id,
+                        book.resource_id,
+                        str(book.booked_day)
+    )
+
 
     # TODO check available - frontend
+
 
     # add transact
     add_transact = Transaction(
@@ -50,9 +57,6 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         club_id = book.club_id,
         acticity_id=book.activity_id
     ) 
-    db.add(add_transact)
-    db.commit()
-    db.refresh(add_transact)
     
     # add available
     query_id = f'{book.resource_id}_{book.booked_day}'
@@ -65,7 +69,7 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         db.add(add_available)
     else:
         query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
-    db.commit()
+    
 
     # TODO 把 db 的 Booked.hr 改成 array~ for 減少資料數目, but why booked?
     # add booked
@@ -79,6 +83,8 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
             available_id = query_id
         )
         db.add(add_booked)
+        db.add(add_transact)
         db.commit()
+        db.refresh(add_transact)
 
     return add_transact

@@ -26,7 +26,8 @@ class PictureErrReport(BaseModel):
     reportErr_picID: int
     num_friendly: int
 
-class PictureWrong(PictureBase):
+class PictureWrong(BaseModel):
+    reportErr_picID: int
     Err_accept: bool
 
 
