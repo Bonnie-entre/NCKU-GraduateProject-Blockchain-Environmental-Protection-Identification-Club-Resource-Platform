@@ -18,6 +18,7 @@ def getPictures(activity_id: int, db: Session = Depends(get_db)):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no pics for activity {activity_id}')
     return db_pics
 
+
 @router_picture.post("/upload", response_model=Pictures)
 def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     #TODO Blockchain
@@ -29,13 +30,24 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
         base64 = picture.base64,
         hash = hash
     )
-    #TODO 圖片存檔
 
+
+    #add Transaction
+    db_activity = db.query(Activity).filter(Activity.id==picture.activity_id).first()
+    db_last_transact = db.query(Transaction).filter(Transaction.club_id==db_activity.club_id).order_by(Transaction.id.desc()).first()
+    add_transact = Transaction(
+        amount = picture.num_friendly,  #1:1
+        token_left = db_last_transact.token_left + picture.num_friendly,
+        hash = hash,
+        club_id = db_activity.club_id,
+        acticity_id=picture.activity_id
+    ) 
+    db.add(add_transact)
     db.add(add_pic)
     db.commit()
+    db.refresh(add_transact)
     db.refresh(add_pic)
 
-    #TODO add Transaction, 給 token!! (backend 的計算 based on transaction 的 left token)
 
     return add_pic
 
