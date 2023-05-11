@@ -1,0 +1,29 @@
+version: '3'
+services:
+  EFT_db:
+    container_name: EFT_db
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    image: EFT_db:latest
+    restart: always
+    ports:
+      - "5432:5432"
+
+  EFT_backend:
+    container_name: EFT_backend
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: EFT_backend:latest
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      - EFT_db
+    environment:
+      DB_CONNECTION_URI: postgres://postgres:0000@EFT_db/graduate_fastapi
+
+
+    
+    

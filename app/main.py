@@ -17,7 +17,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(router_user)
 app.include_router(router_resource)

@@ -16,7 +16,6 @@ sqlalchemy = "==1.4.41"
 sqlparse = "==0.4.2"
 uvicorn = "==0.18.3"
 pyexecjs = "*"
-ethers = "*"
 web3 = "*"
 
 [dev-packages]
