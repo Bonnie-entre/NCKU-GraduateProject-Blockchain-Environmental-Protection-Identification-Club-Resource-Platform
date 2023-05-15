@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 
 router_activity = APIRouter(
-                    prefix="/activities"
+                    prefix="/activities",
+                    tags=["Activity"]
         )
 
 

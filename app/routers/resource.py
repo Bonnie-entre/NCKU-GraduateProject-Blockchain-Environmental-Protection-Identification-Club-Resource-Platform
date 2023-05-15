@@ -7,9 +7,12 @@ from app.database import get_db
 from sqlalchemy.orm import Session
 
 from blockchain.src.EFT_functions import BookResource_backend
+from app.auth.jwt_bearer import jwtBearer
+
 
 router_resource = APIRouter(
-                    prefix="/resources"
+                    prefix="/resources",
+                    tags=['Resource']
         )
 
 
@@ -29,7 +32,7 @@ def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     return db_resource_booked
 
 
-@router_resource.post("/book")
+@router_resource.post("/book", dependencies=[Depends(jwtBearer())])
 def createBook(book:BookCreate, db: Session = Depends(get_db)):
     # check token enough
     db_resource = db.query(Resource).filter(Resource.id==book.resource_id).first()

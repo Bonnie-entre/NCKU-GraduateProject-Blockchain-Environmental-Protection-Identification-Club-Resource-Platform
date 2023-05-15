@@ -6,10 +6,11 @@ from app.database import get_db
 from sqlalchemy.orm import Session
 
 from blockchain.src.EFT_functions import uploadPic, ModifyPicnum_Add, ModifyPicnum_Retake
-
+from app.auth.jwt_bearer import jwtBearer
 
 router_picture = APIRouter(
-                    prefix="/pictures"
+                    prefix="/pictures",
+                    tags=["Activity"]
         )
 
 
@@ -21,7 +22,7 @@ def getPictures(activity_id: int, db: Session = Depends(get_db)):
     return db_pics
 
 
-@router_picture.post("/upload") #, response_model=Pictures)
+@router_picture.post("/upload", dependencies=[Depends(jwtBearer())]) #, response_model=Pictures)
 def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     #Blockchain
     db_activity = db.query(Activity).filter(Activity.id==picture.activity_id).first()
@@ -70,7 +71,7 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     return add_pic
 
 
-@router_picture.post("/reportErr")
+@router_picture.post("/reportErr", dependencies=[Depends(jwtBearer())])
 def reportErr(picture: PictureErrReport, db: Session = Depends(get_db)):
     # Blockchain, only make sure modify would upload to blackchain. So, here doon't need to
 

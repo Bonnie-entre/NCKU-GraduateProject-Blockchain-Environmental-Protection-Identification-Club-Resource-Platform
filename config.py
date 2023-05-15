@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     PRIVATE_KEY: str = os.getenv('PRIVATE_KEY')
     ACCOUNT_ADDRESS: str = os.getenv('ACCOUNT_ADDRESS')
     EFToken_ContractAddress: str = os.getenv('EFToken_ContractAddress')
+    JWT_SECRET: str = os.getenv('JWT_SECRET')
+    JWT_ALGORITHM: str = os.getenv('JWT_ALGORITHM')
 
     class Config:
         env_file = ".env"

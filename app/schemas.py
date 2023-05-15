@@ -66,9 +66,12 @@ class ClubBase(BaseModel):
     id: int
 
 class ClubModify(BaseModel):
-    password: Optional[str] = None
+    password: Optional[str] = '0000'
     name: Optional[str] = None
-    address: Optional[str] = None
+    address: Optional[str] = '0x'
+
+class ClubLogin(ClubBase):
+    password: str
 
 class Clubs(ClubBase):
     password: str
@@ -76,6 +79,9 @@ class Clubs(ClubBase):
     address: Optional[str] = None
     upload_pics: List[Pictures] = []
     booked_records: List[Books] = []
+
+class ClubsToken(Clubs):
+    token: str
 
     class Config:
         orm_mode = True

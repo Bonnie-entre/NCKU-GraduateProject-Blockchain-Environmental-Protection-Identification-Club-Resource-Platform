@@ -19,12 +19,19 @@ class Club(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     address = Column(String, nullable=True)
-    password = Column(String, default='0000')
+    password = Column(String, server_default='0000')
 
     booked = relationship("Booked", back_populates="club")
     transact = relationship("Transaction", back_populates="club")
     activity = relationship("Activity", back_populates="club")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "address": self.address,
+            "password": self.password
+        }
 
 class Picture(Base):
     __tablename__ = "pictures"

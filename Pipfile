@@ -17,6 +17,7 @@ sqlparse = "==0.4.2"
 uvicorn = "==0.18.3"
 pyexecjs = "*"
 web3 = "*"
+pyjwt = "*"
 
 [dev-packages]
 

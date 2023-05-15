@@ -2,9 +2,12 @@ FROM python:3.8.12-slim
 RUN pip install pipenv
 
 WORKDIR /backend/
-COPY /graduateProject_backend/Pipfile /backend/Pipfile
-COPY /graduateProject_backend/Pipfile.lock /backend/Pipfile.lock
+COPY /Pipfile /backend/Pipfile
+COPY /Pipfile.lock /backend/Pipfile.lock
 RUN pipenv install
-COPY ./graduateProject_backend/ /graduateProject_backend/
+COPY . .
 
-CMD ["pipenv", "run", "uvicorn", "--port", "8000", "--host", "0.0.0.0","--log-level", "error", "app:APP"]
+HEALTHCHECK --interval=5s --timeout=3s \
+  CMD pg_isready -h eft_db -p 5432 -U postgres || exit 1
+
+CMD ["pipenv", "run", "uvicorn", "--port", "8000", "--host", "0.0.0.0","--log-level", "error", "app.main:app"]

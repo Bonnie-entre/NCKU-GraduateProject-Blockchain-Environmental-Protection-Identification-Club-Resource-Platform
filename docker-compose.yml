@@ -1,29 +1,25 @@
 version: '3'
 services:
-  EFT_db:
-    container_name: EFT_db
+  eft_db:
+    container_name: eft_db
     build:
-      context: .
-      dockerfile: Dockerfile.db
-    image: EFT_db:latest
+     context: .
+     dockerfile: Dockerfile.db
+    image: eft_db:latest
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
-  EFT_backend:
-    container_name: EFT_backend
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    image: EFT_backend:latest
+  eft_backend:
+    container_name: eft_backend
+    build:
+     context: .
+     dockerfile: Dockerfile.test
+    image: eft_backend:latest
     restart: always
     ports:
       - 8000:8000
     depends_on:
-      - EFT_db
+      - eft_db
     environment:
-      DB_CONNECTION_URI: postgres://postgres:0000@EFT_db/graduate_fastapi
-
-
-    
-    
+      DB_CONNECTION_URI: postgres://postgres:0000@eft_db/graduate_fastapi
