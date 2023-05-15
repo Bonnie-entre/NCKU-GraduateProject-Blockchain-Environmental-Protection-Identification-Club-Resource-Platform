@@ -12,14 +12,18 @@ services:
 
   eft_backend:
     container_name: eft_backend
-    build:
+    build: 
      context: .
-     dockerfile: Dockerfile.test
+     dockerfile: Dockerfile
     image: eft_backend:latest
-    restart: always
+    restart: always 
     ports:
       - 8000:8000
     depends_on:
       - eft_db
     environment:
       DB_CONNECTION_URI: postgres://postgres:0000@eft_db/graduate_fastapi
+
+
+    
+    
