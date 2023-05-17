@@ -16,7 +16,7 @@ router_user = APIRouter(
                     tags=["User"]
         )
 
-@router_user.get("", response_model=List[Clubs])
+@router_user.get("")#, response_model=List[Clubs])
 def getUser(db: Session = Depends(get_db)):
     usrs = db.query(Club).all()
     return usrs
@@ -70,7 +70,8 @@ def createUser(club: ClubModify, db: Session = Depends(get_db)):
     add_user = Club(
         name = club.name,
         address = club.address,
-        password = club.password
+        password = club.password,
+        token = 0
     )
     db.add(add_user)
     db.commit()

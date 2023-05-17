@@ -22,14 +22,30 @@ def getResources(db: Session = Depends(get_db)):
     return resources
 
 
-@router_resource.get("/occupy/{resource_id}/{booked_day}")
+@router_resource.get("/free/{resource_id}/{booked_day}")
 def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     query_id = resource_id + '_' + booked_day
     db_resource_booked = db.query(Available).filter(Available.resourceId_bookedDay==query_id).first()
     
     if db_resource_booked is None:
         return HTTPException(detail=f'Resource {resource_id} on {booked_day} is available', status_code=status.HTTP_200_OK)
-    return db_resource_booked
+    db_free = db_resource_booked.to_dict()
+    free = []
+    x = 9
+    for i in range(len(db_free["occupy_hr"])):
+        if x==db_free["occupy_hr"][i]:
+            i+=1
+        else:
+            free.append(x)
+        x+=1
+    
+    while(x<=21):
+        free.append(x)
+        x+=1
+    del db_free["occupy_hr"]
+    db_free["free_hour"] = free
+
+    return {**db_free}
 
 
 @router_resource.post("/book", dependencies=[Depends(jwtBearer())])
@@ -58,7 +74,6 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         token_left = after_transact_token,
         hash = hash,
         club_id = book.club_id,
-        acticity_id=book.activity_id
     ) 
     
     # add available

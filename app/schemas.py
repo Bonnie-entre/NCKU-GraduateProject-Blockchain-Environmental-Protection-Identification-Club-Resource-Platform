@@ -51,7 +51,6 @@ class BookCreate(BaseModel):
     resource_id: int
     booked_day: str
     club_id: int
-    activity_id: int
     hr: List[int]
 
 class Books(BookCreate):
@@ -77,6 +76,7 @@ class Clubs(ClubBase):
     password: str
     name: str
     address: Optional[str] = None
+    token: int
     upload_pics: List[Pictures] = []
     booked_records: List[Books] = []
 
@@ -101,3 +101,12 @@ class Transactions(TransactionBase):
         orm_mode = True
 
 
+class ActivityBase(BaseModel):
+    id: int
+
+class Activities(ActivityBase):
+    name: str
+    date: datetime
+    
+    class Config:
+        orm_mode = True

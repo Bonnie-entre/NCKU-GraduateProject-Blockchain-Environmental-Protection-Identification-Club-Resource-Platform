@@ -24,13 +24,24 @@ def getPictures(activity_id: int, db: Session = Depends(get_db)):
 
 @router_picture.post("/upload", dependencies=[Depends(jwtBearer())]) #, response_model=Pictures)
 def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
-    #Blockchain
+    
     db_activity = db.query(Activity).filter(Activity.id==picture.activity_id).first()
     if db_activity is None:
-        print("its None")
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'acrivity ID {picture.activity_id} doesn\'t exit')
     
-    print("its not none")
+    # Upload state
+    if (datetime.now()-db_activity.date).days>3 or db_activity.state==False:
+        db_activity.state = False
+        db.add(db_activity)
+        db.commit()
+        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Exceed 3 days, uploading not allow!')
+
+    if db_activity.state:
+        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Cannot upload again!')
+
+    db_activity.state = True
+
+    #Blockchain
     db_last_ID = db.query(Picture).order_by(Picture.id.desc()).first().id
     hash = uploadPic(
                         db_activity.club_id,
@@ -59,10 +70,10 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
         token_left = db_last_transact.token_left + picture.num_friendly,
         hash = hash,
         club_id = db_activity.club_id,
-        acticity_id=picture.activity_id
     ) 
     db.add(add_transact)
     db.add(add_pic)
+    db.add(db_activity)
     db.commit()
     db.refresh(add_transact)
     db.refresh(add_pic)
@@ -153,7 +164,6 @@ def checkErr_Add(picture: PictureWrong, db: Session = Depends(get_db)):
         token_left = db_last_transact.token_left + amount,
         hash = hash,
         club_id = db_activity.club_id,
-        acticity_id=db_activity.id
     ) 
 
     db.add(add_transact)    

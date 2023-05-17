@@ -17,6 +17,7 @@ uvicorn = "==0.18.3"
 pyexecjs = "*"
 web3 = "*"
 pyjwt = "*"
+psycopg2 = "*"
 
 [dev-packages]
 

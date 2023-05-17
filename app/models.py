@@ -20,6 +20,7 @@ class Club(Base):
     name = Column(String, nullable=False)
     address = Column(String, nullable=True)
     password = Column(String, server_default='0000')
+    token = Column(Integer, nullable=False, default=0)
 
     booked = relationship("Booked", back_populates="club")
     transact = relationship("Transaction", back_populates="club")
@@ -32,6 +33,7 @@ class Club(Base):
             "address": self.address,
             "password": self.password
         }
+    
 
 class Picture(Base):
     __tablename__ = "pictures"
@@ -82,7 +84,12 @@ class Available(Base):
     resourceId_bookedDay = Column(String, primary_key=True)     #ex.'2_20240505'
     occupy_hr = Column(ARRAY(Integer))
     occupy_bookedID = relationship("Booked", back_populates="available_day")
-
+    
+    def to_dict(self):
+        return {
+            "resourceId_bookedDay": self.resourceId_bookedDay,
+            "occupy_hr": self.occupy_hr,
+        }
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -95,8 +102,6 @@ class Transaction(Base):
 
     club_id = Column(Integer, ForeignKey("clubs.id"))
     club = relationship("Club", back_populates="transact")
-    acticity_id = Column(Integer, ForeignKey("activities.id"))
-    activity = relationship("Activity", back_populates="transaction")
     booked = relationship("Booked", back_populates="transact")
     
 
@@ -106,8 +111,10 @@ class Activity(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     date = Column(DateTime, nullable=False)
+    state = Column(Boolean, nullable=True)  # True: have uploaded pic; False: overdue, cannot upload; empty: can upload
+
 
     club_id = Column(Integer, ForeignKey("clubs.id"))
     club = relationship("Club", back_populates="activity")
     picture = relationship("Picture", back_populates="activity")
-    transaction = relationship("Transaction", back_populates="activity")
+    
