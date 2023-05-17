@@ -13,7 +13,7 @@ router_activity = APIRouter(
         )
 
 
-@router_activity.get("/{club_id}", response_model=List[Activities])
+@router_activity.get("", response_model=List[Activities])
 def getActivities(club_id: int, db: Session = Depends(get_db)):
     db_activities = db.query(Activity).filter(Activity.club_id==club_id).order_by(asc(Activity.date)).all()
     if db_activities is None or len(db_activities)==0: 

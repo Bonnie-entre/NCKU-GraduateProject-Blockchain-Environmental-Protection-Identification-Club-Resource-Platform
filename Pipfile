@@ -18,6 +18,7 @@ pyexecjs = "*"
 web3 = "*"
 pyjwt = "*"
 psycopg2 = "*"
+eth-utils = "*"
 
 [dev-packages]
 

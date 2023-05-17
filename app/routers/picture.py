@@ -14,7 +14,7 @@ router_picture = APIRouter(
         )
 
 
-@router_picture.get("/{activity_id}")
+@router_picture.get("")
 def getPictures(activity_id: int, db: Session = Depends(get_db)):
     db_pics = db.query(Picture).filter(Picture.activity_id == activity_id).all()
     if db_pics is None or len(db_pics)==0: 

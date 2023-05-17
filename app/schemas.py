@@ -77,8 +77,8 @@ class Clubs(ClubBase):
     name: str
     address: Optional[str] = None
     token: int
-    upload_pics: List[Pictures] = []
-    booked_records: List[Books] = []
+    # upload_pics: List[Pictures] = []
+    # booked_records: List[Books] = []
 
 class ClubsToken(Clubs):
     token: str
@@ -107,6 +107,7 @@ class ActivityBase(BaseModel):
 class Activities(ActivityBase):
     name: str
     date: datetime
+    state: Optional[bool] = None
     
     class Config:
         orm_mode = True

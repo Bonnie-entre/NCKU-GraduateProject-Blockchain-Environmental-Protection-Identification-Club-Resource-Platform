@@ -22,7 +22,7 @@ def getResources(db: Session = Depends(get_db)):
     return resources
 
 
-@router_resource.get("/free/{resource_id}/{booked_day}")
+@router_resource.get("/free")
 def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     query_id = resource_id + '_' + booked_day
     db_resource_booked = db.query(Available).filter(Available.resourceId_bookedDay==query_id).first()

@@ -7,6 +7,7 @@ from app.schemas import *
 from app.database import get_db
 from sqlalchemy.orm import Session
 
+from eth_utils import is_checksum_address
 from blockchain.src.EFT_functions import CreateClub
 from app.auth.jwt_handler import signJWT
 from app.auth.jwt_bearer import jwtBearer
@@ -16,13 +17,14 @@ router_user = APIRouter(
                     tags=["User"]
         )
 
-@router_user.get("")#, response_model=List[Clubs])
+
+@router_user.get("")
 def getUser(db: Session = Depends(get_db)):
     usrs = db.query(Club).all()
     return usrs
 
 
-@router_user.get("/{club_id}", response_model=Clubs)
+@router_user.get("/user")
 def getUser(club_id: int, db: Session = Depends(get_db)):
     db_user = db.query(Club).filter(Club.id==club_id).first()
     if db_user is None:
@@ -41,20 +43,21 @@ def userLogin(login: ClubLogin, db: Session = Depends(get_db)):
     return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid login details!')
 
 
-@router_user.patch("/update/{club_id}", dependencies=[Depends(jwtBearer())]) #, response_model=ClubModify)
+@router_user.patch("/update", dependencies=[Depends(jwtBearer())]) #, response_model=ClubModify)
 def updateUser(club_id: int, club: ClubModify, db: Session = Depends(get_db)):
+    if not is_checksum_address(club.address):
+        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Invalid Address')
+    
     db_user = db.query(Club).filter(Club.id==club_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    _name = ''
-    _addr = ''
-    if club.name is not None:
-        db_user.name = _name = club.name
-    if club.password is not None:
-        db_user.password = club.password
-    if club.address is not None:
-        db_user.address = _addr = club.address
+    if club.name is None or club.password is None or club.address is None:
+        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Invalid parameters')
+
+    db_user.name = _name = club.name
+    db_user.password = club.password
+    db_user.address = _addr = club.address
 
     # blockchain
     hash = CreateClub(club_id, _name, _addr)
@@ -65,8 +68,11 @@ def updateUser(club_id: int, club: ClubModify, db: Session = Depends(get_db)):
     return db_user
 
 
-@router_user.post("/register", response_model=ClubsToken)
+@router_user.post("/register")#, response_model=ClubsToken)
 def createUser(club: ClubModify, db: Session = Depends(get_db)):
+    if not is_checksum_address(club.address):
+        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Invalid Address')
+
     add_user = Club(
         name = club.name,
         address = club.address,
