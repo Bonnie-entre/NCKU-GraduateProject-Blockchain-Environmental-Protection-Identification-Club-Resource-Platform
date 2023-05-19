@@ -33,3 +33,7 @@ URL: htttp://eft.dev.19gale.ai
 ### 20230510 version 2.0
 - Sepolia Network
     - [0x2D0a9836F92B1129629BbC7C51DC71cE8183F4e8](https://sepolia.etherscan.io/address/0x2d0a9836f92b1129629bbc7c51dc71ce8183f4e8)
+
+### 20230519 version 2.0
+- Sepolia Network
+    - [0x5b12192c4561E7327B83BbE7bF3b8a3f90198adD](https://sepolia.etherscan.io/address/0x5b12192c4561e7327b83bbe7bf3b8a3f90198add)

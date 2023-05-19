@@ -1,7 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from typing import List
 from app.models import *
-from app.schemas import *
 from app.database import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy import asc
@@ -13,9 +11,13 @@ router_activity = APIRouter(
         )
 
 
-@router_activity.get("", response_model=List[Activities])
+@router_activity.get("")
 def getActivities(club_id: int, db: Session = Depends(get_db)):
     db_activities = db.query(Activity).filter(Activity.club_id==club_id).order_by(asc(Activity.date)).all()
     if db_activities is None or len(db_activities)==0: 
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no activities for Club ID {club_id}')
-    return db_activities
+    
+    activities = []
+    for i in db_activities:
+        activities.append(i.to_dict_without_clubid())
+    return activities

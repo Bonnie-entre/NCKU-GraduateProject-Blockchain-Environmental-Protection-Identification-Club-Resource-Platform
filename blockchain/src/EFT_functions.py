@@ -135,6 +135,7 @@ def BookResource_backend(_clubID, _resourceID, _date):
     return '0x' + binascii.hexlify(txn_hash).decode('utf-8')
 
 def CreateClub(_id, _name, _addr):
+    print(contract_address)
     nonce = w3.eth.get_transaction_count(settings.ACCOUNT_ADDRESS)
     txn = contract.functions.CreateClub(_id, _name, _addr).build_transaction(
     {

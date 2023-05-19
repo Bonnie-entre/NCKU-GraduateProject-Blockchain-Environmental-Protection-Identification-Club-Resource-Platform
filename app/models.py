@@ -118,3 +118,10 @@ class Activity(Base):
     club = relationship("Club", back_populates="activity")
     picture = relationship("Picture", back_populates="activity")
     
+    def to_dict_without_clubid(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "date": self.date,
+            "state": self.state
+        }

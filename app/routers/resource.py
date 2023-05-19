@@ -27,8 +27,14 @@ def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     query_id = resource_id + '_' + booked_day
     db_resource_booked = db.query(Available).filter(Available.resourceId_bookedDay==query_id).first()
     
+    # all available 
     if db_resource_booked is None:
-        return HTTPException(detail=f'Resource {resource_id} on {booked_day} is available', status_code=status.HTTP_200_OK)
+        free = {'resourceId_bookedDay': query_id, 
+                'free_hour':[9,10,11,12,13,14,15,16,17,18,19,20,21]
+                }
+        return {**free}
+    
+    # some available
     db_free = db_resource_booked.to_dict()
     free = []
     x = 9
@@ -89,7 +95,6 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
     
 
-    # TODO 把 db 的 Booked.hr 改成 array~ for 減少資料數目, but why booked?
     # add booked
     for i in book.hr:
         add_booked = Booked(
