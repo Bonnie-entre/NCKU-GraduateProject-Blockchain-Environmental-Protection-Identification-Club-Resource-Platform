@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Response, status, Depends
 from typing import List
 
 from app.schemas import *
@@ -6,7 +6,7 @@ from app.models import *
 from app.database import get_db
 from sqlalchemy.orm import Session
 
-from blockchain.src.EFT_functions import BookResource_backend
+from blockchain.src.EFT_functions import BookResource_backend, CreateResource
 from app.auth.jwt_bearer import jwtBearer
 
 
@@ -61,7 +61,7 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
     db_last_transact = db.query(Transaction).filter(Transaction.club_id==book.club_id).order_by(Transaction.id.desc()).first()
     after_transact_token = db_last_transact.token_left - (db_resource.cost * len(book.hr))
     if after_transact_token<0:
-        return HTTPException(detail=f'club {book.club_id}\'s token={db_last_transact.token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
+        return Response(content=f'club {book.club_id}\'s token={db_last_transact.token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
     
     # blockchain
     hash = BookResource_backend(
@@ -111,3 +111,22 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         db.refresh(add_transact)
 
     return add_transact
+
+
+@router_resource.post("/create")
+def createResource(name: str, cost: int, db: Session = Depends(get_db)):
+    add_resource = Resource(
+            name = name,
+            cost = cost
+        )
+    db.add(add_resource)
+    db.commit()
+    db.refresh(add_resource)
+    
+    hash = CreateResource(
+                        add_resource.id,
+                        name,
+                        cost
+    )
+
+    return add_resource

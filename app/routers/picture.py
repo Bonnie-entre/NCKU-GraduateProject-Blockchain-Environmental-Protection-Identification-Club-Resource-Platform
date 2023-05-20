@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, status, Depends
+from fastapi import APIRouter, Response, status, Depends
 from typing import List
 from app.models import *
 from app.schemas import *
@@ -18,7 +18,7 @@ router_picture = APIRouter(
 def getPictures(activity_id: int, db: Session = Depends(get_db)):
     db_pics = db.query(Picture).filter(Picture.activity_id == activity_id).all()
     if db_pics is None or len(db_pics)==0: 
-        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'there is no pics for activity {activity_id}')
+        return Response(status_code=status.HTTP_404_NOT_FOUND, content=f'there is no pics for activity {activity_id}')
     return db_pics
 
 
@@ -27,17 +27,17 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     
     db_activity = db.query(Activity).filter(Activity.id==picture.activity_id).first()
     if db_activity is None:
-        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'acrivity ID {picture.activity_id} doesn\'t exit')
+        return Response(status_code=status.HTTP_404_NOT_FOUND, content=f'acrivity ID {picture.activity_id} doesn\'t exit')
     
     # Upload state
     if (datetime.now()-db_activity.date).days>3 or db_activity.state==False:
         db_activity.state = False
         db.add(db_activity)
         db.commit()
-        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Exceed 3 days, uploading not allow!')
+        return Response(status_code=status.HTTP_406_NOT_ACCEPTABLE, content=f'Exceed 3 days, uploading not allow!')
 
     if db_activity.state:
-        return HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f'Cannot upload again!')
+        return Response(status_code=status.HTTP_406_NOT_ACCEPTABLE, content=f'Cannot upload again!')
 
     db_activity.state = True
 
@@ -77,7 +77,6 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(add_transact)
     db.refresh(add_pic)
-
 
     return add_pic
 
@@ -122,7 +121,7 @@ def checkErr_Add(picture: PictureWrong, db: Session = Depends(get_db)):
     db_pic_err.Err_accept = True
     db_pic_old = db.query(Picture).filter(Picture.reportErr_new_picID==picture.reportErr_picID).first()
     if db_pic_old is None:
-        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'picture ID{picture.reportErr_picID} was covered by another errID')
+        return Response(status_code=status.HTTP_404_NOT_FOUND, content=f'picture ID{picture.reportErr_picID} was covered by another errID')
     
     token_old = db_pic_old.num_friendly
     token_new = db_pic_err.num_friendly
