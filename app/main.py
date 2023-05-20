@@ -1,4 +1,4 @@
-from fastapi import FastAPI,  Depends, status
+from fastapi import FastAPI,  Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.models import *
@@ -67,7 +67,9 @@ async def init_setClub(db: Session = Depends(get_db)):
         db.commit()
         db.refresh(add_user)
         hash = CreateClub(add_user.id, i["name"], i["address"])
-        time.sleep(15)
+        txn_receipt = w3.eth.getTransactionReceipt(hash)
+        while(txn_receipt is None):
+            time.sleep(10)
         print(i, hash)
 
     return {"message": "Initialize Successfully!"}
@@ -99,7 +101,9 @@ async def init_setResource(db: Session = Depends(get_db)):
         db.refresh(add_resource)
         
         hash = CreateResource(add_resource.id, i["name"], i["cost"])
-        time.sleep(20)
+        txn_receipt = w3.eth.getTransactionReceipt(hash)
+        while(txn_receipt is None):
+            time.sleep(10)
         print(i, hash)
 
     return {"message": "Initialize Successfully!"}
