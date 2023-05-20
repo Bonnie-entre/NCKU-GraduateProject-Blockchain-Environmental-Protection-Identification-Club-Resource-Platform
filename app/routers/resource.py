@@ -81,7 +81,14 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
         hash = hash,
         club_id = book.club_id,
     ) 
-    
+
+
+    # club - token
+    db_user = db.query(Club).filter(Club.id==book.club_id).first()
+    db_user.token = after_transact_token
+    db.add(db_user)
+    db.commit()
+
     # add available
     query_id = f'{book.resource_id}_{book.booked_day}'
     query_available = db.query(Available).filter(Available.resourceId_bookedDay==query_id).first()
@@ -91,6 +98,7 @@ def createBook(book:BookCreate, db: Session = Depends(get_db)):
             occupy_hr = book.hr
         )
         db.add(add_available)
+        db.commit()
     else:
         query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
     

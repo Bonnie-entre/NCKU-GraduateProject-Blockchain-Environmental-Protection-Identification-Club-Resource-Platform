@@ -74,7 +74,7 @@ async def init_setClub(db: Session = Depends(get_db)):
         hash = CreateClub(add_user.id, i["name"], i["address"])
         time.sleep(20)
         txn_receipt = w3.eth.get_transaction_receipt(hash)        
-        while(txn_receipt is None and txn_receipt['status']):
+        while(txn_receipt is None or txn_receipt['status']==0):
             time.sleep(10)
         print(i, hash)
 
@@ -109,7 +109,7 @@ async def init_setResource(db: Session = Depends(get_db)):
         hash = CreateResource(add_resource.id, i["name"], i["cost"])
         time.sleep(20)
         txn_receipt = w3.eth.get_transaction_receipt(hash)
-        while(txn_receipt is None and txn_receipt['status']):
+        while(txn_receipt is None or txn_receipt['status']==0):
             time.sleep(10)
         print(i, hash)
 

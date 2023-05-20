@@ -108,6 +108,12 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
         hash = hash,
         club_id = db_activity.club_id,
     ) 
+
+    # club - token
+    db_user = db.query(Club).filter(Club.id==db_activity.club_id).first()
+    db_user.token = token_left + picture.num_friendly
+
+    db.add(db_user)
     db.add(add_transact)
     db.add(add_pic)
     db.add(db_activity)
@@ -202,6 +208,11 @@ def checkErr_Add(picture: PictureWrong, db: Session = Depends(get_db)):
         club_id = db_activity.club_id,
     ) 
 
+    # club - token
+    db_user = db.query(Club).filter(Club.id==db_activity.club_id).first()
+    db_user.token = db_last_transact.token_left + amount
+    
+    db.add(db_user)
     db.add(add_transact)    
     db.add(db_pic_err)
     db.add(db_pic_old)
