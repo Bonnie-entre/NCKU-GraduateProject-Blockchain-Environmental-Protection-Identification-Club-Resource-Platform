@@ -5,8 +5,15 @@ from app.schemas import *
 from app.database import get_db
 from sqlalchemy.orm import Session
 
+from config import settings
+
 from blockchain.src.EFT_functions import uploadPic, ModifyPicnum_Add, ModifyPicnum_Retake
+from web3 import Web3# Web3 provider
+w3 = Web3(Web3.HTTPProvider(settings.SEPOLIA_RPC_URL)) # Insert your RPC URL here
+
 from app.auth.jwt_bearer import jwtBearer
+
+import time
 
 router_picture = APIRouter(
                     prefix="/pictures",
@@ -42,17 +49,43 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     db_activity.state = True
 
     #Blockchain
-    db_last_ID = db.query(Picture).order_by(Picture.id.desc()).first().id
-    hash = uploadPic(
-                        db_activity.club_id,
-                        picture.activity_id,
-                        db_activity.name,
-                        str(picture.date),
-                        db_last_ID,
-                        picture.num_friendly*(10**18),
-                        picture.base64
-    )
+    db_last_ID = db.query(Picture).order_by(Picture.id.desc()).first()
+    if db_last_ID is None:
+        db_last_ID = 0
+    else:
+        db_last_ID = db_last_ID.id
 
+    _gas = 350000
+    tx_success = False
+    while(not tx_success):        
+        try:
+            hash = uploadPic(
+                                db_activity.club_id,
+                                picture.activity_id,
+                                db_activity.name,
+                                str(picture.date),
+                                db_last_ID+1,
+                                picture.num_friendly*(10**18),
+                                picture.base64,
+                                _gas
+            )
+            time.sleep(20)
+            txn_receipt = w3.eth.get_transaction_receipt(hash)
+            print(txn_receipt)
+            print(txn_receipt['status'])
+            if txn_receipt is None or txn_receipt['status']==0:
+                tx_success = False        
+                _gas = _gas + 50000
+                print('fail',  _gas)    
+            else:
+                tx_success = True
+                print(hash, _gas)
+                print(txn_receipt)
+                print(txn_receipt['status'])
+        except:
+            _gas = _gas + 100000
+            print('fail',  _gas)
+        
 
     # add Picture
     add_pic = Picture(
@@ -65,9 +98,13 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
 
     #add Transaction
     db_last_transact = db.query(Transaction).filter(Transaction.club_id==db_activity.club_id).order_by(Transaction.id.desc()).first()
+    if db_last_transact is None:
+        token_left = 0
+    else:
+        token_left = db_last_transact.token_left
     add_transact = Transaction(
         amount = picture.num_friendly,  #1:1
-        token_left = db_last_transact.token_left + picture.num_friendly,
+        token_left = token_left + picture.num_friendly,
         hash = hash,
         club_id = db_activity.club_id,
     ) 

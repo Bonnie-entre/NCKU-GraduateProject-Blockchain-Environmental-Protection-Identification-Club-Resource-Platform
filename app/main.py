@@ -11,7 +11,12 @@ from app.routers.activity import *
 from app.routers.transaction import *
 from app.routers.picture import *
 
+from config import settings
+
 from blockchain.src.EFT_functions import *
+from web3 import Web3# Web3 provider
+w3 = Web3(Web3.HTTPProvider(settings.SEPOLIA_RPC_URL)) # Insert your RPC URL here
+
 import time
 
 from js.d3 import d3
@@ -67,8 +72,9 @@ async def init_setClub(db: Session = Depends(get_db)):
         db.commit()
         db.refresh(add_user)
         hash = CreateClub(add_user.id, i["name"], i["address"])
-        txn_receipt = w3.eth.getTransactionReceipt(hash)
-        while(txn_receipt is None):
+        time.sleep(20)
+        txn_receipt = w3.eth.get_transaction_receipt(hash)        
+        while(txn_receipt is None and txn_receipt['status']):
             time.sleep(10)
         print(i, hash)
 
@@ -101,8 +107,9 @@ async def init_setResource(db: Session = Depends(get_db)):
         db.refresh(add_resource)
         
         hash = CreateResource(add_resource.id, i["name"], i["cost"])
-        txn_receipt = w3.eth.getTransactionReceipt(hash)
-        while(txn_receipt is None):
+        time.sleep(20)
+        txn_receipt = w3.eth.get_transaction_receipt(hash)
+        while(txn_receipt is None and txn_receipt['status']):
             time.sleep(10)
         print(i, hash)
 

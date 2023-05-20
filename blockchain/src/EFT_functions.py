@@ -30,7 +30,8 @@ def uploadPic(
                     _date,
                     _picID,
                     _picNum,
-                    _base64
+                    _base64,
+                    _gas
 ):
     nonce = w3.eth.get_transaction_count(settings.ACCOUNT_ADDRESS)
     txn = contract.functions.UploadPicture(
@@ -44,7 +45,7 @@ def uploadPic(
                                         ).build_transaction(
     {
         'from': settings.ACCOUNT_ADDRESS,
-        'gas': 200000,
+        'gas': _gas,
         'gasPrice': w3.eth.gas_price,
         'nonce': nonce
     })
