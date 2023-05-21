@@ -43,3 +43,9 @@ URL: htttp://eft.dev.19gale.ai
 - Modify: Picture without base64 owing to data too large cost long time
 - Sepolia Network
     - [0x02977f145366f129Ecd30ecea3a465f5baAed1Ec](https://sepolia.etherscan.io/address/0x02977f145366f129ecd30ecea3a465f5baaed1ec)
+
+
+### 20230521 version 4.0
+- Modify: Book cost
+- Sepolia Network
+[0x9f6ddb9098a7B506B0d0788d955413FdEEC561bD](https://sepolia.etherscan.io/address/0x9f6ddb9098a7b506b0d0788d955413fdeec561bd)

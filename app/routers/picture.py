@@ -83,7 +83,8 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     add_pic = Picture(
         num_friendly = picture.num_friendly,
         activity_id = picture.activity_id,
-        hash = hash
+        hash = hash,
+        base64 = picture.base64
     )
 
 

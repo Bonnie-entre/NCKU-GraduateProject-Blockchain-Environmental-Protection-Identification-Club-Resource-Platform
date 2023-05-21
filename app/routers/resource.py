@@ -124,7 +124,8 @@ def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
     # check token enough
     db_resource = db.query(Resource).filter(Resource.id==book.resource_id).first()
     db_last_transact = db.query(Transaction).filter(Transaction.club_id==book.club_id).order_by(Transaction.id.desc()).first()
-    after_transact_token = db_last_transact.token_left - (db_resource.cost * len(book.hr))
+    _cost = db_resource.cost * len(book.hr)
+    after_transact_token = db_last_transact.token_left - _cost
     if after_transact_token<0:
         return Response(content=f'club {book.club_id}\'s token={db_last_transact.token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
     
@@ -132,7 +133,8 @@ def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
     hash = BookResource_backend(
                         book.club_id,
                         book.resource_id,
-                        str(book.booked_day)
+                        str(book.booked_day),
+                        _cost
     )
 
 

@@ -118,9 +118,9 @@ def ModifyPicnum_Retake(
 
     return '0x' + binascii.hexlify(txn_hash).decode('utf-8')
 
-def BookResource_backend(_clubID, _resourceID, _date):
+def BookResource_backend(_clubID, _resourceID, _date, _cost):
     nonce = w3.eth.get_transaction_count(settings.ACCOUNT_ADDRESS)
-    txn = contract.functions.BookResource_backend(_clubID, _resourceID, _date).build_transaction(
+    txn = contract.functions.BookResource_backend(_clubID, _resourceID, _date, _cost).build_transaction(
     {
         'from': settings.ACCOUNT_ADDRESS,
         'gas': 200000,

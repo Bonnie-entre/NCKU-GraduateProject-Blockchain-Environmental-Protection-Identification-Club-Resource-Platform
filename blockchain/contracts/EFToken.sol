@@ -140,10 +140,12 @@ contract EFToken is ERC20, Ownable{
     function BookResource(
         uint256 _clubID,
         uint256 _resourceID,
-        string memory _date
+        string memory _date,
+        uint256 _cost
     ) external {
-        require(clubs[_clubID].addr==_msgSender(), "You're not the Club Token Holder!!");
-        uint256 _cost = resources[_resourceID].cost;
+        address _addr = clubs[_clubID].addr;
+        require(_addr==_msgSender(), "You're not the Club Token Holder!!");
+        require(balanceOf(_addr)>=_cost, "You don't have enough EFT!");
         transfer(owner(), _cost);    
 
         emit BookedResource(_clubID, clubs[_clubID].name, _date, _resourceID, resources[_resourceID].name, _cost);
@@ -158,10 +160,10 @@ contract EFToken is ERC20, Ownable{
     function BookResource_backend(
         uint256 _clubID,
         uint256 _resourceID,
-        string memory _date
+        string memory _date,
+        uint256 _cost
     ) external onlyOwner{
-        uint256 _cost = resources[_resourceID].cost;
-        _transfer(clubs[_clubID].addr, owner(), _cost);      //need approve  
+        _transfer(clubs[_clubID].addr, owner(), _cost);
 
         emit BookedResource(_clubID, clubs[_clubID].name, _date, _resourceID, resources[_resourceID].name, _cost);
     }
