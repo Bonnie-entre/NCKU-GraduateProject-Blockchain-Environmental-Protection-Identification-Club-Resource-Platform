@@ -55,7 +55,72 @@ def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
 
 
 @router_resource.post("/book", dependencies=[Depends(jwtBearer())])
-def createBook(book:BookCreate, db: Session = Depends(get_db)):
+def createBook_Noblockchain(book:BookCreate, db: Session = Depends(get_db)):
+    
+    # club - token
+    db_user = db.query(Club).filter(Club.id==book.club_id).first()
+    if db_user is None:
+        return Response(status_code=status.HTTP_404_NOT_FOUND, content=f'Club ID {book.club_id} doesn\'t exist.')
+    
+    db_resource = db.query(Resource).filter(Resource.id==book.resource_id).first()
+    
+    # check token enough
+    token_left = db_user.token
+    after_transact_token = token_left - (db_resource.cost * len(book.hr))
+    if after_transact_token<0:
+        return Response(content=f'club {book.club_id}\'s token={token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
+
+    db_user.token = after_transact_token
+    db.add(db_user)
+    db.commit()
+   
+
+    # TODO check available - frontend
+
+
+    # add transact
+    add_transact = Transaction(
+        amount = db_resource.cost* len(book.hr),
+        token_left = after_transact_token,
+        hash = hash,
+        club_id = book.club_id,
+    ) 
+
+
+    # add available
+    query_id = f'{book.resource_id}_{book.booked_day}'
+    query_available = db.query(Available).filter(Available.resourceId_bookedDay==query_id).first()
+    if query_available is None:        
+        add_available = Available(
+            resourceId_bookedDay = query_id,
+            occupy_hr = book.hr
+        )
+        db.add(add_available)
+        db.commit()
+    else:
+        query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
+    
+
+    # add booked
+    for i in book.hr:
+        add_booked = Booked(
+            day = book.booked_day,
+            hr = i,
+            resource_id = book.resource_id,
+            club_id = book.club_id,
+            transact_id = add_transact.id,
+            available_id = query_id
+        )
+        db.add(add_booked)
+        db.add(add_transact)
+        db.commit()
+        db.refresh(add_transact)
+
+    return add_transact
+
+
+@router_resource.post("/book/blockchain", dependencies=[Depends(jwtBearer())])
+def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
     # check token enough
     db_resource = db.query(Resource).filter(Resource.id==book.resource_id).first()
     db_last_transact = db.query(Transaction).filter(Transaction.club_id==book.club_id).order_by(Transaction.id.desc()).first()

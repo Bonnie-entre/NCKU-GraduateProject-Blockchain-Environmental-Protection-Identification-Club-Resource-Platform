@@ -30,7 +30,6 @@ def uploadPic(
                     _date,
                     _picID,
                     _picNum,
-                    _base64,
                     _gas
 ):
     nonce = w3.eth.get_transaction_count(settings.ACCOUNT_ADDRESS)
@@ -41,7 +40,6 @@ def uploadPic(
                                         _date,
                                         _picID,
                                         _picNum,
-                                        _base64
                                         ).build_transaction(
     {
         'from': settings.ACCOUNT_ADDRESS,

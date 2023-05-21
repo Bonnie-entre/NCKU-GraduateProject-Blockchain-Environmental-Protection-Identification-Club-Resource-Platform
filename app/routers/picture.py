@@ -55,7 +55,7 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
     else:
         db_last_ID = db_last_ID.id
 
-    _gas = 350000
+    _gas = 20000
     tx_success = False
     while(not tx_success):        
         try:
@@ -66,32 +66,23 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
                                 str(picture.date),
                                 db_last_ID+1,
                                 picture.num_friendly*(10**18),
-                                picture.base64,
                                 _gas
             )
             time.sleep(20)
             txn_receipt = w3.eth.get_transaction_receipt(hash)
-            print(txn_receipt)
-            print(txn_receipt['status'])
             if txn_receipt is None or txn_receipt['status']==0:
                 tx_success = False        
-                _gas = _gas + 50000
-                print('fail',  _gas)    
+                _gas = _gas + 50000   
             else:
                 tx_success = True
-                print(hash, _gas)
-                print(txn_receipt)
-                print(txn_receipt['status'])
         except:
-            _gas = _gas + 100000
-            print('fail',  _gas)
+            _gas = _gas + 50000
         
 
     # add Picture
     add_pic = Picture(
         num_friendly = picture.num_friendly,
         activity_id = picture.activity_id,
-        base64 = picture.base64,
         hash = hash
     )
 

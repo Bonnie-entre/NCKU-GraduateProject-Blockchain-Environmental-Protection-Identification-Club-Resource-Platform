@@ -1,4 +1,4 @@
-/* This is Version 2.0 
+/* \Version: 3.0 
     Author: Cai Yi-Wen */
 
 // SPDX-License-Identifier: MIT
@@ -64,8 +64,7 @@ contract EFToken is ERC20, Ownable{
         string _date,
         uint256 indexed _pictureID,
         uint256 _number,
-        uint256 _token,
-        string _base64
+        uint256 _token
     );
 
     event ModifyPicture(
@@ -93,13 +92,12 @@ contract EFToken is ERC20, Ownable{
         string memory _activityName,
         string memory _date,
         uint256 _picID,
-        uint256 _picNum, 
-        string memory _base64
+        uint256 _picNum
     ) external onlyOwner{
         uint256 _amount = _picNum;   //1:1 or not?
         _mint(clubs[_clubID].addr, _amount);
 
-        emit uploadPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _date, _picID, _picNum, _amount, _base64);
+        emit uploadPicture(_clubID, clubs[_clubID].name, _activityID, _activityName, _date, _picID, _picNum, _amount);
     }
 
 
