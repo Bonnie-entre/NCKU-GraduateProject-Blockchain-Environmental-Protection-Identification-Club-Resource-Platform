@@ -29,6 +29,8 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "https://hsiangling0.github.io/tableware_detector/",
+    "https://frontend.eft.dev.19gale.ai"
 ]
 
 app.add_middleware(

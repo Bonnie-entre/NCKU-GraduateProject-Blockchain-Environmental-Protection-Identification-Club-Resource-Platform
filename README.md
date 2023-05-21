@@ -48,4 +48,4 @@ URL: htttp://eft.dev.19gale.ai
 ### 20230521 version 4.0
 - Modify: Book cost
 - Sepolia Network
-[0x9f6ddb9098a7B506B0d0788d955413FdEEC561bD](https://sepolia.etherscan.io/address/0x9f6ddb9098a7b506b0d0788d955413fdeec561bd)
+    - [0x9f6ddb9098a7B506B0d0788d955413FdEEC561bD](https://sepolia.etherscan.io/address/0x9f6ddb9098a7b506b0d0788d955413fdeec561bd)
