@@ -55,7 +55,7 @@ def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
 
 
 @router_resource.post("/book", dependencies=[Depends(jwtBearer())])
-def createBook_Noblockchain(book:BookCreate, db: Session = Depends(get_db)):
+def createBook_Noblockchain(book:BookCreate_Noblockchain, db: Session = Depends(get_db)):
     
     # club - token
     db_user = db.query(Club).filter(Club.id==book.club_id).first()
@@ -82,7 +82,7 @@ def createBook_Noblockchain(book:BookCreate, db: Session = Depends(get_db)):
     add_transact = Transaction(
         amount = db_resource.cost* len(book.hr),
         token_left = after_transact_token,
-        hash = hash,
+        hash = book.hash,
         club_id = book.club_id,
     ) 
 
@@ -134,7 +134,7 @@ def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
                         book.club_id,
                         book.resource_id,
                         str(book.booked_day),
-                        _cost
+                        _cost*(10**18)
     )
 
 

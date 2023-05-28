@@ -53,6 +53,9 @@ class BookCreate(BaseModel):
     club_id: int
     hr: List[int]
 
+class BookCreate_Noblockchain(BookCreate):
+    hash: str
+
 class Books(BookCreate):
     pass
 
