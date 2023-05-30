@@ -38,16 +38,15 @@ def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     db_free = db_resource_booked.to_dict()
     free = []
     x = 9
-    for i in range(len(db_free["occupy_hr"])):
-        if x==db_free["occupy_hr"][i]:
-            i+=1
+    i = 0
+    while(x<=21):
+        if i<len(db_free["occupy_hr"]) and x==db_free["occupy_hr"][i]:
+                print(i, db_free["occupy_hr"][i])
+                i+=1
         else:
             free.append(x)
         x+=1
     
-    while(x<=21):
-        free.append(x)
-        x+=1
     del db_free["occupy_hr"]
     db_free["free_hour"] = free
 
