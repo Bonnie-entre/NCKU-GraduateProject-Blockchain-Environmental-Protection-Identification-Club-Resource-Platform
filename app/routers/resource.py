@@ -168,9 +168,7 @@ def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
         )
         db.add(add_available)
         db.commit()
-        print("no")
     else:
-        print("y", query_available.resourceId_bookedDay)
         query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))       
         db.add(query_available)
         db.commit()
