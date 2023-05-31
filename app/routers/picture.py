@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Response, status, Depends
-from typing import List
 from app.models import *
 from app.schemas import *
 from app.database import get_db
@@ -8,7 +7,7 @@ from sqlalchemy.orm import Session
 from config import settings
 
 from blockchain.src.EFT_functions import uploadPic, ModifyPicnum_Add, ModifyPicnum_Retake
-from web3 import Web3# Web3 provider
+from web3 import Web3   # Web3 provider
 w3 = Web3(Web3.HTTPProvider(settings.SEPOLIA_RPC_URL)) # Insert your RPC URL here
 
 from app.auth.jwt_bearer import jwtBearer
