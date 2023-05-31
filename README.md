@@ -63,3 +63,10 @@ URL: htttp://eft.dev.19gale.ai
 ### 20230531 version 4.0
 - Sepolia Network
     - [0xF26B1bd488D2Dc2C8BcA2D2859A7fC492451FC30](https://sepolia.etherscan.io/address/0xF26B1bd488D2Dc2C8BcA2D2859A7fC492451FC30)
+
+
+
+### 20230531 version 5.0
+- Modify: Book add hr infomation
+- Sepolia Network
+    - [0x52Eb0Ac2E529850abd9798B812c9D8996499a349](https://sepolia.etherscan.io/address/0x52eb0ac2e529850abd9798b812c9d8996499a349)

@@ -68,7 +68,7 @@ def uploadPicture(picture: PictureCreate, db: Session = Depends(get_db)):
                                 picture.num_friendly*(10**18),
                                 _gas
             )
-            time.sleep(20)
+            time.sleep(25)
             txn_receipt = w3.eth.get_transaction_receipt(hash)
             if txn_receipt is None or txn_receipt['status']==0:
                 tx_success = False        

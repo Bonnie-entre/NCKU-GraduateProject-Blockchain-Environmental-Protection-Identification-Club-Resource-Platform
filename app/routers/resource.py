@@ -131,17 +131,24 @@ def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
     if after_transact_token<0:
         return Response(content=f'club {book.club_id}\'s token={db_last_transact.token_left} < resource\'cost={db_resource.cost}*hrs', status_code=status.HTTP_400_BAD_REQUEST)
     
+    _hr=""
+    print(type(book.hr))
+    print(len(book.hr))
+    for i in book.hr:
+        _hr += str(i) + ","
+    print(_hr)
+
     # blockchain
     hash = BookResource_backend(
                         book.club_id,
                         book.resource_id,
                         str(book.booked_day),
+                        _hr,
                         _cost*(10**18)
     )
 
 
     # TODO check available - frontend
-
 
     # add transact
     add_transact = Transaction(

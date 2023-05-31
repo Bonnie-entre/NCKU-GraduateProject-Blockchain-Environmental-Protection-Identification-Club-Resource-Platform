@@ -1,14 +1,11 @@
-/* \Version: 4.0 
+/* \Version: 5.0 
     Author: Cai Yi-Wen */
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "./ERC20.sol";
-import "./Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract EFToken is ERC20, Ownable{
     uint256 constant initialSupply = 1000000;
@@ -54,6 +51,7 @@ contract EFToken is ERC20, Ownable{
         uint256 indexed _clubID,
         string _clubName,
         string _date,
+        string _hr,
         uint256 indexed _resourceID,
         string _resourceName,
         uint256 _cost
@@ -144,6 +142,7 @@ contract EFToken is ERC20, Ownable{
         uint256 _clubID,
         uint256 _resourceID,
         string memory _date,
+        string memory _hr,
         uint256 _cost
     ) external {
         address _addr = clubs[_clubID].addr;
@@ -151,7 +150,7 @@ contract EFToken is ERC20, Ownable{
         require(balanceOf(_addr)>=_cost, "You don't have enough EFT!");
         transfer(owner(), _cost);    
 
-        emit BookedResource(_clubID, clubs[_clubID].name, _date, _resourceID, resources[_resourceID].name, _cost);
+        emit BookedResource(_clubID, clubs[_clubID].name, _date, _hr, _resourceID, resources[_resourceID].name, _cost);
     }
 
 
@@ -164,11 +163,12 @@ contract EFToken is ERC20, Ownable{
         uint256 _clubID,
         uint256 _resourceID,
         string memory _date,
+        string memory _hr,
         uint256 _cost
     ) external onlyOwner{
         _transfer(clubs[_clubID].addr, owner(), _cost);
 
-        emit BookedResource(_clubID, clubs[_clubID].name, _date, _resourceID, resources[_resourceID].name, _cost);
+        emit BookedResource(_clubID, clubs[_clubID].name, _date, _hr, _resourceID, resources[_resourceID].name, _cost);
     }
 
 
