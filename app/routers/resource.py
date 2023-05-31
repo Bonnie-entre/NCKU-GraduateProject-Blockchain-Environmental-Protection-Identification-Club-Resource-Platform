@@ -39,9 +39,10 @@ def getOccupy(resource_id: str, booked_day: str, db: Session = Depends(get_db)):
     free = []
     x = 9
     i = 0
+    list_occupy = sorted(db_free["occupy_hr"])
     while(x<=21):
-        if i<len(db_free["occupy_hr"]) and x==db_free["occupy_hr"][i]:
-                print(i, db_free["occupy_hr"][i])
+        if i<len(db_free["occupy_hr"]) and x==list_occupy[i]:
+                print(i, list_occupy[i])
                 i+=1
         else:
             free.append(x)
@@ -98,6 +99,8 @@ def createBook_Noblockchain(book:BookCreate_Noblockchain, db: Session = Depends(
         db.commit()
     else:
         query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
+        db.add(query_available)
+        db.commit()
     
 
     # add booked
@@ -165,8 +168,12 @@ def createBook_blockchain(book:BookCreate, db: Session = Depends(get_db)):
         )
         db.add(add_available)
         db.commit()
+        print("no")
     else:
-        query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))
+        print("y", query_available.resourceId_bookedDay)
+        query_available.occupy_hr = sorted(list(set(query_available.occupy_hr+book.hr)))       
+        db.add(query_available)
+        db.commit()
     
 
     # add booked
